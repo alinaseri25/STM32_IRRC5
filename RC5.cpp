@@ -15,12 +15,8 @@ void IRRC5::WaitForRead(void)
 	uint32_t CurData = 0,IRTimeOut;
 	uint8_t count;
 
-	/* The START Sequence begin here
-	* there will be a pulse of 9ms LOW and
-	* than 4.5 ms space (HIGH)
-	*/
 	IRTimeOut = HAL_GetTick() + 9;
-	while (!(HAL_GPIO_ReadPin (GPIOx, GPIO_Pin)))  // wait for the pin to go high.. 9ms LOW
+	while (!(HAL_GPIO_ReadPin (GPIOx, GPIO_Pin)))
 	{
 		if(HAL_GetTick() >= IRTimeOut)
 		{
@@ -30,7 +26,7 @@ void IRRC5::WaitForRead(void)
 	}
 	
 	IRTimeOut = HAL_GetTick() + 5;
-	while ((HAL_GPIO_ReadPin (GPIOx, GPIO_Pin)))  // wait for the pin to go low.. 4.5ms HIGH
+	while ((HAL_GPIO_ReadPin (GPIOx, GPIO_Pin)))
 	{
 		if(HAL_GetTick() >= IRTimeOut)
 		{
@@ -39,33 +35,24 @@ void IRRC5::WaitForRead(void)
 		}
 	}
 	
-
-	/* START of FRAME ends here*/
-
-	/* DATA Reception
-	* We are only going to check the SPACE after 562.5us pulse
-	* if the space is 562.5us, the bit indicates '0'
-	* if the space is around 1.6ms, the bit is '1'
-	*/
-	
 	for (int i=0; i<32; i++)
 	{
 		count=0;
 
-		while (!(HAL_GPIO_ReadPin (GPIOx, GPIO_Pin))); // wait for pin to go high.. this is 562.5us LOW
+		while (!(HAL_GPIO_ReadPin (GPIOx, GPIO_Pin))); 
 
-		while ((HAL_GPIO_ReadPin (GPIOx, GPIO_Pin)))  // count the space length while the pin is high
+		while ((HAL_GPIO_ReadPin (GPIOx, GPIO_Pin)))  
 		{
 			count++;
 			DWT_Delay_us(100);
 		}
 
-		if (count > 12) // if the space is more than 1.2 ms
+		if (count > 12) 
 		{
-			CurData |= (1UL << (31-i));   // write 1
+			CurData |= (1UL << (31-i));
 		}
 
-		else CurData &= ~(1UL << (31-i));  // write 0
+		else CurData &= ~(1UL << (31-i));
 	}
 	Data = CurData;
 	IRState = HAL_OK;
